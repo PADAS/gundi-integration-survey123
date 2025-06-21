@@ -12,10 +12,6 @@ class Attributes(BaseModel):
         allow_population_by_field_name = True
         extra = Extra.allow
 
-    # notes: str
-    # radness: str
-    # species: str
-    
 
 class SpatialReference(BaseModel):
     wkid: int
