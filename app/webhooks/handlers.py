@@ -17,7 +17,7 @@ async def webhook_handler(payload: Survey123Payload, integration=None, webhook_c
     logger.info(f"Webhook handler executed with integration: '{integration}'.")
     logger.info(f"Payload: '{payload}'.")
     logger.info(f"Config: '{webhook_config}'.")
-    input_data = json.loads(payload.json())
+    # input_data = json.loads(payload.json())
     # filter_expression = webhook_config.jq_filter.replace("\n", "")
     # transformed_data = pyjq.all(filter_expression, input_data)
     logger.info(f"Transformed Data: {payload.dict()}")
