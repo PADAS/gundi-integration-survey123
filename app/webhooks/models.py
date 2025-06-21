@@ -3,6 +3,7 @@ from typing import List
 
 from pydantic import BaseModel, Field
 from pydantic.config import BaseConfig, Extra
+from .core import WebhookPayload
 
 class Attributes(BaseModel):
     reported_time: int
@@ -136,6 +137,6 @@ class Payload(BaseModel):
     userInfo: UserInfo
 
 
-class Survey123Payload(BaseModel):
+class Survey123Payload(WebhookPayload):
     _json: Payload = Field(alias="json")
 
