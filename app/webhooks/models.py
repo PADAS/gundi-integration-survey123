@@ -1,13 +1,19 @@
 
 from typing import List
-
-from pydantic import BaseModel, Field
+from datetime import datetime, timezone
+from pydantic import BaseModel, Field, validator
 from pydantic.config import BaseConfig, Extra
 from .core import WebhookPayload
 
 class Attributes(BaseModel):
-    reported_time: int
+    reported_time: datetime
     globalid: str
+    
+    @validator('reported_time', pre=True)
+    def validate_reported_time(cls, v):
+        if isinstance(v, int):
+            return datetime.fromtimestamp(v/1000).replace(tzinfo=timezone.utc)
+        return v
     
     class Config:
         allow_population_by_field_name = True
@@ -138,5 +144,5 @@ class Payload(BaseModel):
 
 
 class Survey123Payload(WebhookPayload):
-    _json: Payload = Field(alias="json")
+    survey_response: Payload = Field(alias="json", description="Response data that is specified as the 'json' field in the webhook request.")
 
