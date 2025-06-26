@@ -11,6 +11,9 @@ class Attributes(BaseModel):
     
     @validator('reported_time', pre=True)
     def validate_reported_time(cls, v):
+        if not v:
+            return datetime.now(tz=timezone.utc)
+        
         if isinstance(v, int):
             return datetime.fromtimestamp(v/1000).replace(tzinfo=timezone.utc)
         return v
