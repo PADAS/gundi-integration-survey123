@@ -9,13 +9,10 @@ from pydantic import Field
 
 logger = logging.getLogger(__name__)
 
-# class Survey123Payload(WebhookPayload):
-#     _json: dict = Field(alias="json")
-
-from .models import Survey123Payload
+from .models import Survey123ResponsePayload
 
 @webhook_activity_logger()
-async def webhook_handler(payload: Survey123Payload, integration=None, webhook_config: GenericJsonTransformConfig = None):
+async def webhook_handler(payload: Survey123ResponsePayload, integration=None, webhook_config: GenericJsonTransformConfig = None):
     logger.info(f"Webhook handler executed with integration: '{integration}'.")
     logger.info(f"Payload: '{payload}'.")
     logger.info(f"Config: '{webhook_config}'.")
@@ -29,18 +26,22 @@ async def webhook_handler(payload: Survey123Payload, integration=None, webhook_c
         event_type = transformed_data[0]['event_type']
     
     # TODO: Add support for other Survey123 event types
-    if payload.survey_response.eventType == "addData":
-        event_details = payload.survey_response.feature.attributes.dict()
-        event_details['user_info'] = payload.survey_response.userInfo.dict()
+    if payload.eventType == "addData":
+        event_details = payload.feature.attributes.dict()
+        event_details['user_info'] = payload.userInfo.dict()
+
+
+        # TODO: Revisit after we allow null location in Gundi.
+        location = {
+            "lat":payload.feature.geometry.y,
+            "lon":payload.feature.geometry.x
+            } if payload.feature.geometry else {"lat": 0, "lon": 0}
 
         event_data = {
-            "title": payload.survey_response.surveyInfo.formTitle,
+            "title": payload.surveyInfo.formTitle,
             "event_type": event_type,
-            "recorded_at": payload.survey_response.feature.attributes.reported_time.isoformat(),
-            "location":{
-                "lat":payload.survey_response.feature.geometry.y,
-                "lon":payload.survey_response.feature.geometry.x
-            },
+            "recorded_at": payload.feature.attributes.reported_time.isoformat(),
+            "location":location,
             "event_details": event_details  
         }
 
@@ -48,6 +49,6 @@ async def webhook_handler(payload: Survey123Payload, integration=None, webhook_c
         
         return {"survey_items_count": 1}
     else:
-        logger.info(f'Skipping event with even_type: {payload.survey_response.eventType} that is not yet supported.')
+        logger.info(f'Skipping event with even_type: {payload.eventType} that is not yet supported.')
         logger.debug(f'Skipping event {payload.json()}')
         return {"survey_items_count": 0}

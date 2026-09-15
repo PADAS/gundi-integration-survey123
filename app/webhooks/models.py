@@ -11,6 +11,9 @@ class Attributes(BaseModel):
     
     @validator('reported_time', pre=True)
     def validate_reported_time(cls, v):
+        if not v:
+            return datetime.now(tz=timezone.utc)
+        
         if isinstance(v, int):
             return datetime.fromtimestamp(v/1000).replace(tzinfo=timezone.utc)
         return v
@@ -133,7 +136,7 @@ class UserInfo(BaseModel):
     email: str
 
 
-class Payload(BaseModel):
+class Survey123ResponsePayload(BaseModel):
     eventType: str
     feature: Feature
     applyEdits: List[ApplyEdit]
@@ -141,8 +144,6 @@ class Payload(BaseModel):
     surveyInfo: SurveyInfo
     portalInfo: PortalInfo
     userInfo: UserInfo
-
-
-class Survey123Payload(WebhookPayload):
-    survey_response: Payload = Field(alias="json", description="Response data that is specified as the 'json' field in the webhook request.")
-
+    class Config:
+        allow_population_by_field_name = True
+        extra = Extra.allow
